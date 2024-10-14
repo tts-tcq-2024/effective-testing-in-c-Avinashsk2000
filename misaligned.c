@@ -8,8 +8,7 @@ int printColorMap() {
     int i = 0, j = 0;
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
-
-            for(j = 0; j < 5; j++) {
+            
             // Add an assertion to check if the correct minor color is used
             assert(minorColor[j] != NULL);  // Ensure j indexes into minorColor properly
             
