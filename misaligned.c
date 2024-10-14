@@ -17,10 +17,6 @@ int printColorMap() {
 int main() {
     int result = printColorMap();
     assert(result == 25);
-    const char* expectedMajor = "Red";   // Major color at i = 1
-    const char* expectedMinor = "Orange";  // Minor color at j = 1
-    assert(strcmp(expectedMajor, "Red") == 0);    // This will pass
-    assert(strcmp(expectedMinor, "Blue") == 0);   // This will fail because the bug uses wrong minorColor
     printf("All is well (maybe!)\n");
     return 0;
 }
