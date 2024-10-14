@@ -18,6 +18,7 @@ int main() {
     int result = printColorMap();
     assert(result == 25);
     assert(strcmp("white", "white") == 0);
+    assert(strcmp("Orange", "Orange") == 0);
     printf("All is well (maybe!)\n");
     return 0;
 }
