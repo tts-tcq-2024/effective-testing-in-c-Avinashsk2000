@@ -19,7 +19,7 @@ int generateColorMap(char colorMap[25][50], FormatColorMapFunc formatFunc) {
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
             int index = i * 5 + j;
-            formatFunc(colorMap[index], index, majorColor[i], minorColor[i]);
+            formatFunc(colorMap[index], index, majorColor[i], minorColor[j]);
         }
     }
     
@@ -38,6 +38,9 @@ void mockFormatColorMap(char* buffer, int index, const char* majorColor, const c
     lastIndex = index;
     strcpy(lastMajorColor, majorColor);
     strcpy(lastMinorColor, minorColor);
+
+    // Use the buffer to prevent the unused parameter warning
+    buffer[0] = '\0';  // Just a dummy use
 }
 
 int main() {
