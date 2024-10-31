@@ -21,6 +21,7 @@ void alertInCelcius(float farenheit) {
 
 // Mock function to simulate a failure response
 int mockNetworkAlert(float celcius) {
+    (void)celcius; // Suppress unused parameter warning
     return 500; // Simulating a failure
 }
 
