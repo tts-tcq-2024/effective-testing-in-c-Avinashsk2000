@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+// Define a function pointer type for printf
 typedef int (*printf_ptr)(const char *format, ...);
 
 // Buffer to capture output
@@ -27,12 +28,18 @@ void reset_output() {
     output[0] = '\0'; // Clear the buffer
 }
 
+// Wrapper for original printf to enable testing
+int custom_printf(const char *format, ...) {
+    return mock_printf(format); // Redirect to mock_printf
+}
+
 int printColorMap() {
     const char* majorColor[] = {"White", "Red", "Black", "Yellow", "Violet"};
     const char* minorColor[] = {"Blue", "Orange", "Green", "Brown", "Slate"};
     int i = 0, j = 0;
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
+            // The bug here is minorColor[i], which should be minorColor[j]
             printf("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]); 
         }
     }
@@ -43,21 +50,14 @@ void test_printColorMap() {
     // Reset output before each test
     reset_output();
 
-    // Replace printf with mock_printf temporarily
-    printf_ptr original_printf = printf; // Store original printf
-    printf = mock_printf; // Redirect to mock_printf
-
     // Call the function we want to test
     int result = printColorMap();
 
     // Check the result
     assert(result == 25);
 
-    // Restore original printf
-    printf = original_printf;
-
     // Output the captured output for inspection
-    printf("%s", output);
+    custom_printf("%s", output);
 }
 
 int main() {
