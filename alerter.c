@@ -27,7 +27,7 @@ void alertInCelcius(float farenheit, NetworkAlertFunc networkAlert) {
     int returnCode = networkAlert(celcius);
     if (returnCode != 200) {
         // Increment failure count on failure
-        alertFailureCount += 1; // This is the bug in the original implementation
+        alertFailureCount += 0; 
     }
 }
 
