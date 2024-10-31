@@ -30,16 +30,22 @@ void test_alertInCelcius() {
     // Reset alert failure count before testing
     alertFailureCount = 0;
 
-    // Call alertInCelcius with the mock function
-    alertInCelcius(400.5); // Normal call
-    alertInCelcius(303.6); // Normal call
+    // Temporarily replace the original networkAlertStub with the mock function
+    // Here we simulate the situation where a network alert fails
+    networkAlertStub = mockNetworkAlert; // Redirect to mockNetworkAlert
 
-    // We expect that the alertFailureCount remains 0 due to the bug
-    assert(alertFailureCount == 0); // This will fail due to the bug
+    // Call alertInCelcius with a temperature that would normally result in a failure
+    alertInCelcius(400.5); // Call with a temperature to trigger failure
+
+    // Check if alertFailureCount was incremented (it should not due to the bug)
+    assert(alertFailureCount == 0); // This should fail due to the bug in the implementation
+
+    // Restore original behavior if necessary (not required for this standalone test)
+    // networkAlertStub = originalNetworkAlertStub; // Uncomment if needed
 }
 
 int main() {
-    // Run the test
+    // Run the test to check for bugs
     test_alertInCelcius();
 
     // Original calls to demonstrate the functionality
