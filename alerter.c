@@ -1,58 +1,47 @@
 #include <stdio.h>
 #include <assert.h>
 
-// Global variable to count alerts
+// Global variable to count alert failures
 int alertFailureCount = 0;
 
-// Original network alert stub
+// Declare a function pointer type for network alert
+typedef int (*NetworkAlertFunc)(float);
+
+// Stub function for testing
 int networkAlertStub(float celcius) {
     printf("ALERT: Temperature is %.1f celcius.\n", celcius);
-    return 200; // Always returns 200 in the stub
+    // Stub always returns 500 for failure (simulate alert failure)
+    return 500;
 }
 
-// Function that performs the alert in Celsius
-void alertInCelcius(float farenheit) {
+// Real function for production (for demonstration purposes)
+int realNetworkAlert(float celcius) {
+    printf("Sending real alert for temperature: %.1f celcius.\n", celcius);
+    // Return 200 for ok and 500 for failure
+    return (celcius > 200.0) ? 500 : 200;
+}
+
+// Function to alert based on temperature, with injected network alert function
+void alertInCelcius(float farenheit, NetworkAlertFunc networkAlert) {
     float celcius = (farenheit - 32) * 5 / 9;
-    int returnCode = networkAlertStub(celcius);
+    int returnCode = networkAlert(celcius);
     if (returnCode != 200) {
-        alertFailureCount += 0; // Bug: always adds 0
+        // Increment failure count on failure
+        alertFailureCount += 1; // This is where the bug is
     }
 }
 
-// Mock function to simulate a failure response
-int mockNetworkAlert(float celcius) {
-    (void)celcius; // Suppress unused parameter warning
-    return 500; // Simulating a failure
-}
-
-// Test function to check alertInCelcius behavior
-void test_alertInCelcius() {
-    // Reset alert failure count before testing
-    alertFailureCount = 0;
-
-    // Create a function pointer to the original networkAlertStub
-    int (*originalNetworkAlert)(float) = networkAlertStub;
-
-    // Redirect to mockNetworkAlert
-    networkAlertStub = mockNetworkAlert; // This will still raise an error
-
-    // Call alertInCelcius to simulate the alert
-    alertInCelcius(400.5); // Call with a temperature to trigger failure
-
-    // Check if alertFailureCount was incremented (it should not due to the bug)
-    assert(alertFailureCount == 0); // This should fail due to the bug in the implementation
-
-    // Restore original behavior (This is not strictly necessary in a single test case)
-    networkAlertStub = originalNetworkAlert; // Restore the original function pointer
-}
-
 int main() {
-    // Run the test to check for bugs
-    test_alertInCelcius();
+    // Test environment using the stub
+    alertInCelcius(400.5, networkAlertStub);  // This should fail
+    alertInCelcius(303.6, networkAlertStub);  // This should fail
 
-    // Original calls to demonstrate the functionality
-    alertInCelcius(400.5);
-    alertInCelcius(303.6);
+    assert(alertFailureCount == 2); // Check that we correctly count failures
+
+    alertInCelcius(150.0, realNetworkAlert);  // This should pass
+    alertInCelcius(400.5, realNetworkAlert);  // This should fail
+
+    assert(alertFailureCount == 3); // Validate the final count
     printf("%d alerts failed.\n", alertFailureCount);
     printf("All is well (maybe!)\n");
     return 0;
