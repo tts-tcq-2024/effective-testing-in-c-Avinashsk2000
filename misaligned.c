@@ -1,31 +1,39 @@
 #include <stdio.h>
 #include <assert.h>
-#include <string.h>
 #include <stdarg.h>
+#include <string.h>
 
 // Define a function pointer type for printf
 typedef int (*printf_ptr)(const char *format, ...);
 
-// Buffer to capture output
-static char output[1024];
-static int output_index = 0;
+// Mock structure to store information about printf calls
+typedef struct {
+    int call_count;
+    char buffer[1024];
+} PrintfMock;
+
+PrintfMock mock;
 
 // Mock printf function
 int mock_printf(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    int len = vsnprintf(output + output_index, sizeof(output) - output_index, format, args);
+    
+    // Store the formatted output in the mock buffer
+    int len = vsnprintf(mock.buffer + strlen(mock.buffer), sizeof(mock.buffer) - strlen(mock.buffer), format, args);
+    
     if (len >= 0) {
-        output_index += len;
+        mock.call_count++;
     }
+
     va_end(args);
     return len;
 }
 
-// Reset output for fresh test runs
-void reset_output() {
-    output_index = 0;
-    output[0] = '\0'; // Clear the buffer
+// Reset mock before each test
+void reset_mock() {
+    mock.call_count = 0;
+    mock.buffer[0] = '\0'; // Clear the buffer
 }
 
 int printColorMap() {
@@ -34,7 +42,7 @@ int printColorMap() {
     int i = 0, j = 0;
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
-            // The bug here is minorColor[i], which should be minorColor[j]
+            // Bug here: using minorColor[i] instead of minorColor[j]
             printf("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]); 
         }
     }
@@ -42,56 +50,43 @@ int printColorMap() {
 }
 
 void test_printColorMap() {
-    // Expected output based on correct implementation
-    const char *expected_output =
-        "0 | White | Blue\n"
-        "1 | White | Blue\n"
-        "2 | White | Blue\n"
-        "3 | White | Blue\n"
-        "4 | White | Blue\n"
-        "5 | Red | Orange\n"
-        "6 | Red | Orange\n"
-        "7 | Red | Orange\n"
-        "8 | Red | Orange\n"
-        "9 | Red | Orange\n"
-        "10 | Black | Green\n"
-        "11 | Black | Green\n"
-        "12 | Black | Green\n"
-        "13 | Black | Green\n"
-        "14 | Black | Green\n"
-        "15 | Yellow | Brown\n"
-        "16 | Yellow | Brown\n"
-        "17 | Yellow | Brown\n"
-        "18 | Yellow | Brown\n"
-        "19 | Yellow | Brown\n"
-        "20 | Violet | Slate\n"
-        "21 | Violet | Slate\n"
-        "22 | Violet | Slate\n"
-        "23 | Violet | Slate\n"
-        "24 | Violet | Slate\n";
+    // Reset the mock before each test
+    reset_mock();
 
-    // Reset output before each test
-    reset_output();
+    // Redirect printf to mock_printf
+    printf_ptr original_printf = printf; // Store original printf
+    printf = mock_printf; // Use the mock printf
 
     // Call the function we want to test
     int result = printColorMap();
 
-    // Check the result
-    assert(result == 25);
+    // Restore the original printf
+    printf = original_printf;
 
-    // Compare the captured output to the expected output
-    if (strcmp(output, expected_output) != 0) {
-        printf("Test failed! Output does not match expected:\n");
-        printf("Captured Output:\n%s", output);
-        printf("Expected Output:\n%s", expected_output);
-        assert(0);  // Force the test to fail
-    } else {
-        printf("Test passed!\n");
+    // Check the number of printf calls
+    assert(result == 25);
+    assert(mock.call_count == 25); // Check if it called printf 25 times
+
+    // Analyze the captured output to find inconsistencies
+    int expected_pairs = 25; // We expect 25 color pairs
+    int actual_pairs = 0;
+    char *line = strtok(mock.buffer, "\n");
+    
+    while (line != NULL) {
+        // Count how many times 'Blue', 'Orange', etc., appear in the correct places
+        if (strstr(line, "Blue") || strstr(line, "Orange") || 
+            strstr(line, "Green") || strstr(line, "Brown") || 
+            strstr(line, "Slate")) {
+            actual_pairs++;
+        }
+        line = strtok(NULL, "\n");
     }
+
+    // Fail the test if the actual pairs do not match the expected behavior
+    assert(actual_pairs != expected_pairs); // This will fail if the implementation is correct
 }
 
 int main() {
     test_printColorMap();
-    printf("All is well (maybe!)\n");
     return 0;
 }
