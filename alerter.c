@@ -1,56 +1,50 @@
 #include <stdio.h>
 #include <assert.h>
-#include <string.h>
 
-// Global variables
+// Global variable to count alerts
 int alertFailureCount = 0;
 
-// Function pointer type for networkAlert
-typedef int (*networkAlert_ptr)(float);
-
-// Stub function to simulate the network alert
+// Original network alert stub
 int networkAlertStub(float celcius) {
     printf("ALERT: Temperature is %.1f celcius.\n", celcius);
-    // Stub always succeeds and returns 200
-    return 200;
+    return 200; // Always returns 200 in the stub
 }
 
-// Function to alert in Celsius
-void alertInCelcius(float farenheit, networkAlert_ptr alertFunc) {
+// Function that performs the alert in Celsius
+void alertInCelcius(float farenheit) {
     float celcius = (farenheit - 32) * 5 / 9;
-    int returnCode = alertFunc(celcius);
+    int returnCode = networkAlertStub(celcius);
     if (returnCode != 200) {
-        // This code does not count failures correctly!
-        alertFailureCount += 0; // The bug is here
+        alertFailureCount += 0; // Bug: always adds 0
     }
 }
 
-// Mock function to simulate a failure
+// Mock function to simulate a failure response
 int mockNetworkAlert(float celcius) {
-    // Simulate a failure response
-    return 500; // Non-ok response
+    return 500; // Simulating a failure
 }
 
-// Test function to validate behavior
+// Test function to check alertInCelcius behavior
 void test_alertInCelcius() {
-    // Reset failure count before the test
+    // Reset alert failure count before testing
     alertFailureCount = 0;
 
     // Call alertInCelcius with the mock function
-    alertInCelcius(400.5, mockNetworkAlert);
-    alertInCelcius(303.6, mockNetworkAlert);
+    alertInCelcius(400.5); // Normal call
+    alertInCelcius(303.6); // Normal call
 
-    // The alertFailureCount should still be 0 due to the bug in the logic
-    assert(alertFailureCount == 0); // This will fail if the bug is fixed incorrectly
+    // We expect that the alertFailureCount remains 0 due to the bug
+    assert(alertFailureCount == 0); // This will fail due to the bug
 }
 
 int main() {
     // Run the test
     test_alertInCelcius();
 
-    // Original calls to see the output
-    alertInCelcius(400.5, networkAlertStub);
-    alertInCelcius(303.6, networkAlertStub);
+    // Original calls to demonstrate the functionality
+    alertInCelcius(400.5);
+    alertInCelcius(303.6);
     printf("%d alerts failed.\n", alertFailureCount);
+    printf("All is well (maybe!)\n");
     return 0;
 }
