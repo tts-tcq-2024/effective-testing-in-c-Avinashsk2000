@@ -10,14 +10,14 @@ typedef int (*NetworkAlertFunc)(float);
 // Stub function for testing
 int networkAlertStub(float celcius) {
     printf("ALERT: Temperature is %.1f celcius.\n", celcius);
-    // Stub always returns 500 for failure (simulate alert failure)
-    return 500;
+    // Stub simulates failure by returning 500
+    return 500; // Simulate failure
 }
 
 // Real function for production (for demonstration purposes)
 int realNetworkAlert(float celcius) {
     printf("Sending real alert for temperature: %.1f celcius.\n", celcius);
-    // Return 200 for ok and 500 for failure
+    // Return 200 for ok, return 500 for failure if the temperature exceeds 200.0
     return (celcius > 200.0) ? 500 : 200;
 }
 
@@ -27,21 +27,30 @@ void alertInCelcius(float farenheit, NetworkAlertFunc networkAlert) {
     int returnCode = networkAlert(celcius);
     if (returnCode != 200) {
         // Increment failure count on failure
-        alertFailureCount += 1; // This is where the bug is
+        alertFailureCount += 1; // This is the bug in the original implementation
     }
+}
+
+void test_alertInCelcius(NetworkAlertFunc networkAlert) {
+    alertInCelcius(400.5, networkAlert);  // This should trigger a failure
+    alertInCelcius(303.6, networkAlert);  // This should also trigger a failure
 }
 
 int main() {
     // Test environment using the stub
-    alertInCelcius(400.5, networkAlertStub);  // This should fail
-    alertInCelcius(303.6, networkAlertStub);  // This should fail
+    test_alertInCelcius(networkAlertStub);  // Use stub that always fails
 
-    assert(alertFailureCount == 2); // Check that we correctly count failures
+    assert(alertFailureCount == 2); // Check the failure count for the stub
 
+    // Reset the failure count for the next tests
+    alertFailureCount = 0;
+
+    // Test environment using the real network alert
     alertInCelcius(150.0, realNetworkAlert);  // This should pass
     alertInCelcius(400.5, realNetworkAlert);  // This should fail
 
-    assert(alertFailureCount == 3); // Validate the final count
+    // Check that the failure count reflects the real network alert logic
+    assert(alertFailureCount == 1); // Expecting 1 failure for the temperature over 200.0
     printf("%d alerts failed.\n", alertFailureCount);
     printf("All is well (maybe!)\n");
     return 0;
