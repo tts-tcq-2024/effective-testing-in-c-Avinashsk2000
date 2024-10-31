@@ -1,0 +1,24 @@
+,,,,,
+tshirts.c,,,,,
+Test Scenario,Test Case ID,Test Case Name,Test Input,Expected Output,Test Description
+Handling Size Small,TC001,test_sizeForSmall,37,'S',"When the input is less than 38 cm, the function should return 'S' for size small."
+Handling Size Medium,TC002,test_sizeForMedium,40,'M',"When the input is between 38 cm and 42 cm, the function should return 'M' for size medium."
+Handling Size Large,TC003,test_sizeForLarge,43,'L',"When the input is greater than 42 cm, the function should return 'L' for size large."
+Handling Edge Case Small,TC004,test_sizeForEdgeCaseSmall,38,'S',"When the input is exactly 38 cm, the function should return 'S' for size small."
+Handling Edge Case Medium,TC005,test_sizeForEdgeCaseMedium,42,'M',"When the input is exactly 42 cm, the function should return 'M' for size medium."
+,,,,,
+,,,,,
+misaligned.c,,,,,
+Test Scenario,Test Case ID,Test Case Name,Test Input,Expected Output,Test Description
+Testing Color Map Printing,TC001,test_printColorMap,N/A,25,"The function printColorMap should print 25 lines for color pairs. The mock printf should be called exactly 25 times, and the output should contain the expected colors."
+Validating Captured Output,TC002,test_validateCapturedOutput,N/A,25 color pairs,"Ensure the output captured in the mock buffer contains the correct color pairs, including ""Blue"", ""Orange"", ""Green"", ""Brown"", and ""Slate"" at expected positions."
+,,,,,
+,,,,,
+alerter.c,,,,,
+Test Scenario,Test Case ID,Test Case Name,Test Input,Expected Output,Test Description
+Handling Temperature Alert Failures,TC001,test_alertFailureForHighTemperature,400.5,Increment alertFailureCount by 1,"When the temperature exceeds 200.0, the alert system should increment the failure count by 1."
+Handling Valid Temperature,TC002,test_alertSuccessForLowTemperature,150,No increment in alertFailureCount,"When the temperature is below 200.0, the alert system should not increment the failure count."
+Using Stub for Network Alert,TC003,test_alertUsingStub,400.5,Increment alertFailureCount by 1,"When using a network alert stub that always fails, the alert system should increment the failure count by 1."
+Using Real Network Alert,TC004,test_alertUsingRealNetwork,400.5,Increment alertFailureCount by 1,"When using a real network alert for a temperature exceeding 200.0, the alert system should increment the failure count."
+Handling Valid Temperature with Stub,TC005,test_alertWithStubForNormalTemperature,303.6,Increment alertFailureCount by 1,"When using a network alert stub that always fails, the alert system should increment the failure count by 1."
+Handling Temperature Conversion,TC006,test_temperatureConversion,400.5,Correct Celsius conversion,The function should correctly convert Fahrenheit to Celsius for further alert processing.

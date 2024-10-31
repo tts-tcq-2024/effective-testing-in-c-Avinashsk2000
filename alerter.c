@@ -1,32 +1,74 @@
 #include <stdio.h>
 #include <assert.h>
 
+// Global variable to count alert failures
 int alertFailureCount = 0;
 
-int networkAlertStub(float celcius) {
-    printf("ALERT: Temperature is %.1f celcius.\n", celcius);
-    // Return 200 for ok
-    // Return 500 for not-ok
-    // stub always succeeds and returns 200
-    return 200;
+// Function pointer type for network alert
+typedef int (*NetworkAlertFunc)(float);
+
+// Real function for alerting based on temperature
+int realNetworkAlert(float celcius) {
+    printf("Sending real alert for temperature: %.1f celcius.\n", celcius);
+    return (celcius > 200.0) ? 500 : 200; // 500 for failure, 200 for success
 }
 
-void alertInCelcius(float farenheit) {
+// Stub function simulating a failure
+int networkAlertStub(float celcius) {
+    printf("ALERT: Temperature is %.1f celcius.\n", celcius);
+    return 500; // Simulated failure
+}
+
+// Mock function to validate Celsius conversion
+int mockNetworkAlert(float celcius) {
+    // Check the Celsius value to ensure correct conversion
+    if (celcius == 204.7 || celcius == 150.0) {
+        return 200; // Mock success for known correct values
+    }
+    return 500; // Mock failure for others
+}
+
+// Function to alert based on Fahrenheit input
+void alertInCelcius(float farenheit, NetworkAlertFunc networkAlert) {
     float celcius = (farenheit - 32) * 5 / 9;
-    int returnCode = networkAlertStub(celcius);
+    int returnCode = networkAlert(celcius);
     if (returnCode != 200) {
-        // non-ok response is not an error! Issues happen in life!
-        // let us keep a count of failures to report
-        // However, this code doesn't count failures!
-        // Add a test below to catch this bug. Alter the stub above, if needed.
-        alertFailureCount += 0;
+        alertFailureCount += 0; // Original line to not increment on failure
     }
 }
 
+// Test function to check alert behavior and conversion
+void test_alertInCelcius(NetworkAlertFunc networkAlert) {
+    alertInCelcius(400.5, networkAlert);  // Should trigger a failure
+    alertInCelcius(303.6, networkAlert);  // Should trigger another failure
+    alertInCelcius(212.0, networkAlert);  // Should pass (100 Celsius)
+    alertInCelcius(32.0, networkAlert);    // Should pass (0 Celsius)
+}
+
 int main() {
-    alertInCelcius(400.5);
-    alertInCelcius(303.6);
+    // Test with the stub
+    test_alertInCelcius(networkAlertStub);
+    assert(alertFailureCount == 2); // Expecting 2 failures
+
+    // Reset failure count
+    alertFailureCount = 0;
+
+    // Test with the real alert function
+    alertInCelcius(150.0, realNetworkAlert);  // Should succeed
+    alertInCelcius(400.5, realNetworkAlert);  // Should fail
+
+    // Check the failure count
+    assert(alertFailureCount == 1); // Expecting 1 failure
     printf("%d alerts failed.\n", alertFailureCount);
-    printf("All is well (maybe!)\n");
+    
+    // Test with the mock function to validate conversion
+    alertFailureCount = 0; // Reset count for conversion test
+    alertInCelcius(400.5, mockNetworkAlert); // Should fail (mock)
+    alertInCelcius(303.6, mockNetworkAlert); // Should fail (mock)
+    alertInCelcius(212.0, mockNetworkAlert);  // Should pass (mock)
+    alertInCelcius(32.0, mockNetworkAlert);    // Should pass (mock)
+
+    assert(alertFailureCount == 2); // Expecting 2 failures for mock
+    printf("%d alerts failed during mock test.\n", alertFailureCount);
     return 0;
 }
