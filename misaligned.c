@@ -28,11 +28,6 @@ void reset_output() {
     output[0] = '\0'; // Clear the buffer
 }
 
-// Wrapper for original printf to enable testing
-int custom_printf(const char *format, ...) {
-    return mock_printf(format); // Redirect to mock_printf
-}
-
 int printColorMap() {
     const char* majorColor[] = {"White", "Red", "Black", "Yellow", "Violet"};
     const char* minorColor[] = {"Blue", "Orange", "Green", "Brown", "Slate"};
@@ -47,6 +42,34 @@ int printColorMap() {
 }
 
 void test_printColorMap() {
+    // Expected output based on correct implementation
+    const char *expected_output =
+        "0 | White | Blue\n"
+        "1 | White | Blue\n"
+        "2 | White | Blue\n"
+        "3 | White | Blue\n"
+        "4 | White | Blue\n"
+        "5 | Red | Orange\n"
+        "6 | Red | Orange\n"
+        "7 | Red | Orange\n"
+        "8 | Red | Orange\n"
+        "9 | Red | Orange\n"
+        "10 | Black | Green\n"
+        "11 | Black | Green\n"
+        "12 | Black | Green\n"
+        "13 | Black | Green\n"
+        "14 | Black | Green\n"
+        "15 | Yellow | Brown\n"
+        "16 | Yellow | Brown\n"
+        "17 | Yellow | Brown\n"
+        "18 | Yellow | Brown\n"
+        "19 | Yellow | Brown\n"
+        "20 | Violet | Slate\n"
+        "21 | Violet | Slate\n"
+        "22 | Violet | Slate\n"
+        "23 | Violet | Slate\n"
+        "24 | Violet | Slate\n";
+
     // Reset output before each test
     reset_output();
 
@@ -56,8 +79,15 @@ void test_printColorMap() {
     // Check the result
     assert(result == 25);
 
-    // Output the captured output for inspection
-    custom_printf("%s", output);
+    // Compare the captured output to the expected output
+    if (strcmp(output, expected_output) != 0) {
+        printf("Test failed! Output does not match expected:\n");
+        printf("Captured Output:\n%s", output);
+        printf("Expected Output:\n%s", expected_output);
+        assert(0);  // Force the test to fail
+    } else {
+        printf("Test passed!\n");
+    }
 }
 
 int main() {
