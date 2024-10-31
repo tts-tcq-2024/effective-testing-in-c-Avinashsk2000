@@ -90,6 +90,5 @@ void test_printColorMap() {
 
 int main() {
     test_printColorMap();
-    printf("All is well (maybe!)\n");
     return 0;
 }
