@@ -7,16 +7,16 @@ int alertFailureCount = 0;
 // Function pointer type for network alert
 typedef int (*NetworkAlertFunc)(float);
 
-// Stub function simulating a failure
-int networkAlertStub(float celcius) {
-    printf("ALERT: Temperature is %.1f celcius.\n", celcius);
-    return 500; // Simulated failure
-}
-
 // Real function for alerting based on temperature
 int realNetworkAlert(float celcius) {
     printf("Sending real alert for temperature: %.1f celcius.\n", celcius);
     return (celcius > 200.0) ? 500 : 200; // 500 for failure, 200 for success
+}
+
+// Stub function simulating a failure
+int networkAlertStub(float celcius) {
+    printf("ALERT: Temperature is %.1f celcius.\n", celcius);
+    return 500; // Simulated failure
 }
 
 // Mock function to validate Celsius conversion
@@ -62,14 +62,13 @@ int main() {
     printf("%d alerts failed.\n", alertFailureCount);
     
     // Test with the mock function to validate conversion
-    alertFailureCount = 0; 
-    alertInCelcius(400.5, mockNetworkAlert); 
-    alertInCelcius(303.6, mockNetworkAlert); 
-    alertInCelcius(212.0, mockNetworkAlert);
-    alertInCelcius(32.0, mockNetworkAlert);   
+    alertFailureCount = 0; // Reset count for conversion test
+    alertInCelcius(400.5, mockNetworkAlert); // Should fail (mock)
+    alertInCelcius(303.6, mockNetworkAlert); // Should fail (mock)
+    alertInCelcius(212.0, mockNetworkAlert);  // Should pass (mock)
+    alertInCelcius(32.0, mockNetworkAlert);    // Should pass (mock)
 
     assert(alertFailureCount == 2); // Expecting 2 failures for mock
     printf("%d alerts failed during mock test.\n", alertFailureCount);
-    printf("All is well (maybe!)\n");
     return 0;
 }
