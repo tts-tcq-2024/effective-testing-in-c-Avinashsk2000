@@ -3,8 +3,11 @@
 #include <stdarg.h>
 #include <string.h>
 
-// Define a function pointer type for printf
+// Function pointer type for our mock printf
 typedef int (*printf_ptr)(const char *format, ...);
+
+// Global function pointer for printf
+printf_ptr my_printf = printf;
 
 // Mock structure to store information about printf calls
 typedef struct {
@@ -43,7 +46,7 @@ int printColorMap() {
     for(i = 0; i < 5; i++) {
         for(j = 0; j < 5; j++) {
             // Bug here: using minorColor[i] instead of minorColor[j]
-            printf("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]); 
+            my_printf("%d | %s | %s\n", i * 5 + j, majorColor[i], minorColor[i]); 
         }
     }
     return i * j;
@@ -54,14 +57,14 @@ void test_printColorMap() {
     reset_mock();
 
     // Redirect printf to mock_printf
-    printf_ptr original_printf = printf; // Store original printf
-    printf = mock_printf; // Use the mock printf
+    printf_ptr original_printf = my_printf; // Store original printf
+    my_printf = mock_printf; // Use the mock printf
 
     // Call the function we want to test
     int result = printColorMap();
 
     // Restore the original printf
-    printf = original_printf;
+    my_printf = original_printf;
 
     // Check the number of printf calls
     assert(result == 25);
@@ -88,5 +91,6 @@ void test_printColorMap() {
 
 int main() {
     test_printColorMap();
+    printf("All is well (maybe!)\n");
     return 0;
 }
