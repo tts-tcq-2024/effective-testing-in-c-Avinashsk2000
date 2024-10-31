@@ -39,25 +39,29 @@ int printColorMap() {
     return i * j;
 }
 
-void test_printColorMap(printf_ptr custom_printf) {
-    // Use the mock printf function
-    printf = custom_printf;
-
+void test_printColorMap() {
     // Reset output before each test
     reset_output();
-    
+
+    // Replace printf with mock_printf temporarily
+    printf_ptr original_printf = printf; // Store original printf
+    printf = mock_printf; // Redirect to mock_printf
+
     // Call the function we want to test
     int result = printColorMap();
 
     // Check the result
     assert(result == 25);
 
+    // Restore original printf
+    printf = original_printf;
+
     // Output the captured output for inspection
     printf("%s", output);
 }
 
 int main() {
-    test_printColorMap(mock_printf);
+    test_printColorMap();
     printf("All is well (maybe!)\n");
     return 0;
 }
